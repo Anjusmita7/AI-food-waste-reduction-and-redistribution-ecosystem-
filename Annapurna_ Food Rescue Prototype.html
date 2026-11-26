@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Annapurna · Food Rescue Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2ea;--ink:#16241c;--mut:#5b6b60;--card:#fff;--line:#dfe5da;--g:#1f7a4a;--gs:#e1f1e6;--t:#f0a81c;--ts:#fdf0cf;--r:#d9482b;--rs:#fbe3dc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b120e;--ink:#e8f0e9;--mut:#9fb0a4;--card:#17221b;--line:#2a3a2f;--g:#4fc183;--gs:#17301f;--t:#f3bb48;--ts:#33290f;--r:#f07a60;--rs:#3a1f18}}
+:root[data-theme="dark"]{--bg:#0b120e;--ink:#e8f0e9;--mut:#9fb0a4;--card:#17221b;--line:#2a3a2f;--g:#4fc183;--gs:#17301f;--t:#f3bb48;--ts:#33290f;--r:#f07a60;--rs:#3a1f18}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "DM Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","DM Sans",sans-serif;margin:0;line-height:1.15}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);display:flex;flex-direction:column}
+header{padding:16px 16px 8px}
+header h1{font-size:22px}header p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.roles{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 16px;background:var(--line);padding:4px;border-radius:12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.roles button{border:0;background:none;color:var(--mut);padding:9px 2px;border-radius:9px;font:700 13px "DM Sans",sans-serif;cursor:pointer}
+.roles button[aria-selected=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+main{padding:4px 16px 96px;flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.card h3{font-size:18px;margin-bottom:6px}
+.mut{color:var(--mut);font-size:13px}
+label{display:block;font-weight:700;font-size:13px;margin:12px 0 4px}
+input[type=range]{width:100%;accent-color:var(--g)}
+select,input[type=text]{width:100%;padding:10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+.btn{display:block;width:100%;border:0;border-radius:10px;background:var(--g);color:#fff;padding:13px;font:700 15px "DM Sans",sans-serif;cursor:pointer;margin-top:12px}
+.btn.s{background:var(--ink);color:var(--bg)}.btn.o{background:none;color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--t);outline-offset:2px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center}
+.drop img{max-width:100%;max-height:150px;border-radius:8px;display:block;margin:8px auto 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chips button{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font:500 13px "DM Sans",sans-serif;cursor:pointer}
+.ai{background:var(--ts);border-radius:12px;padding:12px;margin-top:10px}
+.ai b{font-family:"Bricolage Grotesque",sans-serif;font-size:17px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--t);border-top-color:transparent;border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+.p-open{background:var(--ts)}.p-acc{background:var(--gs)}.p-done{background:var(--g);color:#fff}.p-rec{background:var(--rs)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:8px 0 2px}
+.bar i{display:block;height:100%;background:var(--g)}
+.bar.low i{background:var(--r)}
+.score{font:800 26px "Bricolage Grotesque",sans-serif;color:var(--g)}
+.otp{font:800 28px "Bricolage Grotesque",sans-serif;letter-spacing:.2em;background:var(--gs);text-align:center;border-radius:10px;padding:8px;margin:8px 0}
+.empty{text-align:center;color:var(--mut);padding:28px 10px}
+.ledger{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--bg);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.ledger div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.ledger b{display:block;font:800 18px "Bricolage Grotesque",sans-serif}.ledger span{font-size:11px;opacity:.75}
+.v-ok{background:var(--gs)}.v-feed{background:var(--ts)}.v-bad{background:var(--rs)}
+.vd{border-radius:12px;padding:12px;margin-top:12px}
+.log{font-size:13px;color:var(--mut);border-left:3px solid var(--line);padding-left:10px;margin:4px 0}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>Annapurna</h1><p>Predict · Rescue · Recover. Prototype by Team Codecrafts. One simulated minute passes every second.</p></header>
+<div class="roles" role="tablist" id="roles"></div>
+<main id="v"></main>
+</div>
+<div class="ledger"><div id="led"></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const SAMPLES=[{n:'Rice and dal',kg:18,sh:300,c:92},{n:'Veg biryani',kg:12,sh:240,c:88},{n:'Chapati and sabzi',kg:9,sh:270,c:90},{n:'Bread and buns',kg:6,sh:720,c:95}];
+const RECV=[{n:'Seva Shelter',km:1.2,need:9,rel:9,cap:25},{n:'Anand Children’s Home',km:3.8,need:10,rel:10,cap:30},{n:'Campus Community Fridge',km:0.4,need:5,rel:8,cap:12},{n:'Roadside Kitchen NGO',km:2.1,need:7,rel:6,cap:20}];
+const PARTNERS=['Gopal Dairy (animal feed)','GreenLoop Compost','Chilika Biogas Unit'];
+let S={role:'donor',tab:'list',L:[],led:{m:0,k:0},log:[],draft:null,recv:0,otpIn:{}};
+S.id=3;
+S.L=[{id:1,donor:'NIST Boys Hostel Mess',item:'Rice and dal',kg:14,left:200,max:300,st:'open'},{id:2,donor:'Hotel Sagar',item:'Veg pulao',kg:8,left:55,max:240,st:'open'}];
+const hm=m=>m>=60?Math.floor(m/60)+'h '+(m%60)+'m':m+'m';
+const lg=t=>{S.log.unshift(t);S.log=S.log.slice(0,6)};
+function score(l,r){const px=Math.max(0,10-r.km*1.4),urg=l.left<90?10:l.left<180?7:5,cap=l.kg<=r.cap?10:5;return Math.round((.35*px+.3*r.need*1+.2*urg+.15*r.rel)*10*(cap/10*.2+.8))}
+function done(l,kind){l.st=kind;if(kind==='done'){S.led.m+=Math.round(l.kg/.4);S.led.k+=l.kg;lg('Delivered '+l.kg+' kg to '+l.recvN)}else{S.led.k+=l.kg;lg(l.kg+' kg routed to '+l.partner)}}
+function pill(l){return {open:'<span class="pill p-open">Open</span>',acc:'<span class="pill p-acc">Accepted</span>',pick:'<span class="pill p-acc">In transit</span>',done:'<span class="pill p-done">Delivered</span>',rec:'<span class="pill p-rec">Recovered</span>'}[l.st]}
+function fresh(l){const p=Math.max(0,l.left/l.max*100);return `<div class="bar ${p<30?'low':''}"><i style="width:${p}%"></i></div><span class="mut">Safe window: ${hm(Math.max(0,l.left))} left</span>`}
+
+function donorList(){
+ const d=S.draft;
+ let h=`<div class="card"><h3>List surplus in 60 seconds</h3><div class="drop"><input type="file" accept="image/*" id="ph" aria-label="Upload food photo"><div class="mut">Upload a tray photo, or pick a sample below.</div><div id="pv">${d&&d.img?`<img src="${d.img}" alt="Uploaded food">`:''}</div></div>
+ <div class="chips">${SAMPLES.map((s,i)=>`<button data-s="${i}">${s.n}</button>`).join('')}</div>`;
+ if(d&&d.busy)h+=`<div class="ai"><span class="spin"></span>Vision AI reading photo…</div>`;
+ else if(d)h+=`<div class="ai"><b>${d.n}</b><br>About ${d.kg} kg · shelf-life ${hm(d.sh)} · confidence ${d.c}%<label for="kg">Confirm quantity: ${d.kg} kg</label><input type="range" id="kg" min="1" max="40" value="${d.kg}"></div>
+ <label>Hours since cooked: <span id="hv">${d.h}</span></label><input type="range" id="hr" min="0" max="10" value="${d.h}">
+ <label>Holding temperature</label><select id="tp"><option value="hot">Hot, above 60 °C</option><option value="cold">Chilled, below 5 °C</option><option value="room">Room temperature</option></select>
+ <label><input type="checkbox" id="al" style="width:auto"> Allergens declared (nuts, gluten, dairy)</label>
+ <div id="gate"></div><button class="btn" id="pub">Run safety gate and publish</button>`;
+ return h+'</div>';
+}
+function forecast(){
+ const f=+(S.fc||620),u=330,r=Math.round(f*.34*1.05);
+ return `<div class="card"><h3>Tomorrow’s prep advice</h3><label>Expected footfall: ${f}</label><input type="range" id="ff" min="100" max="1200" step="10" value="${f}">
+ <div class="ai" style="background:var(--gs)"><div class="score">${r} kg</div>Suggested to cook. Usual prep is ${u} kg${u>r?', so you could avoid about '+(u-r)+' kg of waste ('+Math.round((u-r)/.4)+' meals).':'.'}</div>
+ <p class="mut">Prototype rule: footfall × portion × buffer. Production uses Prophet on past waste logs.</p></div>`;
+}
+function donor(){
+ let h=`<div class="chips"><button data-tab="list" ${S.tab==='list'?'style="background:var(--ink);color:var(--bg)"':''}>New listing</button><button data-tab="fc" ${S.tab==='fc'?'style="background:var(--ink);color:var(--bg)"':''}>Forecast</button><button data-tab="my" ${S.tab==='my'?'style="background:var(--ink);color:var(--bg)"':''}>My listings (${S.L.length})</button></div>`;
+ if(S.tab==='list')return h+donorList();
+ if(S.tab==='fc')return h+forecast();
+ return h+(S.L.map(card).join('')||'<div class="empty">No listings yet.</div>');
+}
+function card(l){return `<div class="card"><div class="row"><h3>${l.item}, ${l.kg} kg</h3>${pill(l)}</div><div class="mut">${l.donor}${l.recvN?' → '+l.recvN:''}${l.partner?' → '+l.partner:''}</div>${['open','acc','pick'].includes(l.st)?fresh(l):''}</div>`}
+function receiver(){
+ const r=RECV[S.recv];
+ let h=`<label for="rs">You are</label><select id="rs">${RECV.map((x,i)=>`<option value="${i}" ${i==S.recv?'selected':''}>${x.n}</option>`).join('')}</select><p class="mut">${r.km} km away · need ${r.need}/10 · takes up to ${r.cap} kg</p>`;
+ const open=S.L.filter(l=>l.st==='open').sort((a,b)=>score(b,r)-score(a,r));
+ h+=open.map(l=>`<div class="card"><div class="row"><div><h3>${l.item}, ${l.kg} kg</h3><span class="mut">${l.donor}</span></div><div class="score" title="Match score">${score(l,r)}</div></div>${fresh(l)}<button class="btn" data-acc="${l.id}">Accept pickup</button></div>`).join('')||'<div class="empty">No open surplus right now. New listings appear here instantly.</div>';
+ const mine=S.L.filter(l=>l.recvN===r.n&&l.st!=='open');
+ if(mine.length)h+='<h3 style="margin:16px 0 8px">Your pickups</h3>'+mine.map(card).join('');
+ return h;
+}
+function volunteer(){
+ const t=S.L.filter(l=>l.st==='acc'||l.st==='pick');
+ return `<p class="mut">Verified volunteer view. Ask the donor for the 4-digit pickup code.</p>`+(t.map(l=>`<div class="card"><div class="row"><h3>${l.item}, ${l.kg} kg</h3>${pill(l)}</div><div class="mut">${l.donor} → ${l.recvN} (${l.km} km)</div>${fresh(l)}
+ ${l.st==='acc'?`<div class="mut" style="margin-top:8px">Demo code shown to donor: <b>${l.otp}</b></div><input type="text" inputmode="numeric" maxlength="4" placeholder="Enter pickup code" data-otp="${l.id}" value="${S.otpIn[l.id]||''}" aria-label="Pickup code"><button class="btn" data-pick="${l.id}">Confirm pickup</button>`:`<button class="btn s" data-del="${l.id}">Mark delivered</button>`}</div>`).join('')||'<div class="empty">No pickups assigned. Accept one in the Receiver view.</div>');
+}
+function impact(){
+ const rec=S.L.filter(l=>l.st==='rec'),dn=S.L.filter(l=>l.st==='done');
+ return `<div class="card"><h3>Impact ledger</h3><div class="row"><div><div class="score">${S.led.m}</div><span class="mut">meals saved</span></div><div><div class="score">${S.led.k}</div><span class="mut">kg diverted</span></div><div><div class="score">${Math.round(S.led.k*2.5)}</div><span class="mut">kg CO₂e (est.)</span></div></div><p class="mut">Ready for CSR and ESG reports. Estimates: 0.4 kg per meal, 2.5 kg CO₂e per kg food.</p></div>
+ <div class="card"><h3>Handover log</h3>${S.log.map(t=>`<div class="log">${t}</div>`).join('')||'<span class="mut">Nothing logged yet. Every handover records donor, item, batch and time, aligned with FSSAI rules.</span>'}</div>
+ <p class="mut">${dn.length} rescued · ${rec.length} recovered (feed, compost, biogas)</p>`;
+}
+function render(){
+ $('#roles').innerHTML=[['donor','Donor'],['recv','Receiver'],['vol','Volunteer'],['imp','Impact']].map(([k,n])=>`<button role="tab" data-role="${k}" aria-selected="${S.role===k}">${n}</button>`).join('');
+ $('#v').innerHTML={donor,recv:receiver,vol:volunteer,imp:impact}[S.role]();
+ $('#led').innerHTML=`<div><b>${S.led.m}</b><span>meals</span></div><div><b>${S.led.k}</b><span>kg diverted</span></div><div><b>${S.L.filter(l=>l.st==='open').length}</b><span>open</span></div><div><b>${Math.round(S.led.k*2.5)}</b><span>kg CO₂e</span></div>`;
+ if(S.role==='donor'&&S.tab==='list'&&S.draft&&!S.draft.busy){$('#tp').value=S.draft.t||'hot';$('#al').checked=!!S.draft.al;gate()}
+}
+function gate(){
+ const h=+$('#hr').value,t=$('#tp').value,al=$('#al').checked,lim=t==='room'?2:4;
+ let c,ti,d,k;
+ if(!al){c='v-bad';ti='Hold: declare allergens';d='Food can’t go to people until allergens are declared.';k='hold'}
+ else if(h>lim){c='v-feed';ti='Recover route';d='Past the '+lim+'h safe-hold window. It will go to a feed, compost or biogas partner.';k='rec'}
+ else{c='v-ok';ti='Safe to rescue';d='Within the safe window. Publishing will alert nearby receivers.';k='ok'}
+ $('#gate').innerHTML=`<div class="vd ${c}"><b>${ti}</b><br>${d}</div>`;$('#pub').disabled=k==='hold';$('#pub').dataset.k=k;
+ S.draft.h=h;S.draft.t=t;S.draft.al=al;
+}
+function analyse(s,img){
+ S.draft={busy:1,img};render();
+ setTimeout(()=>{S.draft={...s,h:1,img};render()},1100);
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ const d=b.dataset;
+ if(d.role){S.role=d.role;render()}
+ else if(d.tab){S.tab=d.tab;render()}
+ else if(d.s!==undefined)analyse(SAMPLES[d.s],null);
+ else if(d.acc){const l=S.L.find(x=>x.id==d.acc),r=RECV[S.recv];l.st='acc';l.recvN=r.n;l.km=r.km;l.otp=String(1000+Math.floor(Math.random()*9000));lg(r.n+' accepted '+l.item+'. OTP issued.');render()}
+ else if(d.pick){const l=S.L.find(x=>x.id==d.pick);if((S.otpIn[l.id]||'')===l.otp){l.st='pick';lg('Pickup verified by OTP for '+l.item);render()}else{b.textContent='Wrong code, try again';setTimeout(()=>b.textContent='Confirm pickup',1500)}}
+ else if(d.del){const l=S.L.find(x=>x.id==d.del);done(l,'done');render()}
+ else if(b.id==='pub'){
+  const k=b.dataset.k,x=S.draft,l={id:++S.id,donor:'Your kitchen',item:x.n,kg:x.kg,left:x.sh-x.h*60,max:x.sh,st:'open'};
+  if(k==='rec'||l.left<=0){l.partner=PARTNERS[S.id%3];l.left=0;done(l,'rec')}
+  S.L.unshift(l);S.draft=null;S.tab='my';render();
+ }
+});
+document.addEventListener('input',e=>{
+ const t=e.target;
+ if(t.id==='kg'){S.draft.kg=+t.value;t.parentNode.querySelector('label').textContent='Confirm quantity: '+t.value+' kg'}
+ else if(t.id==='hr'){$('#hv').textContent=t.value;gate()}
+ else if(t.id==='tp'||t.id==='al')gate();
+ else if(t.id==='ff'){S.fc=t.value;render()}
+ else if(t.id==='rs'){S.recv=+t.value;render()}
+ else if(t.dataset&&t.dataset.otp)S.otpIn[t.dataset.otp]=t.value;
+});
+document.addEventListener('change',e=>{
+ if(e.target.id==='ph'&&e.target.files[0]){
+  const f=e.target.files[0],rd=new FileReader();
+  rd.onload=()=>analyse(SAMPLES[f.size%SAMPLES.length],rd.result);rd.readAsDataURL(f)}
+});
+// simulated clock: 1 second = 1 minute
+setInterval(()=>{
+ let ch=false;
+ S.L.forEach(l=>{if(['open','acc','pick'].includes(l.st)){l.left--;ch=true;
+  if(l.left<=0){l.left=0;l.partner=PARTNERS[l.id%3];lg(l.item+' expired unclaimed. Auto-routed to '+l.partner);done(l,'rec')}}});
+ if(ch&&!['list','fc'].includes(S.tab)||ch&&S.role!=='donor'){const a=document.activeElement;if(!a||a.tagName!=='INPUT'&&a.tagName!=='SELECT')render()}
+},1000);
+render();
+</script>
+</body>
+</html>
